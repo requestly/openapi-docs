@@ -1,0 +1,343 @@
+openapi: 3.0.0
+info:
+  title: Create / Update UserAgent Rule
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Change UserAgent for Google"
+              objectType: "rule"
+              ruleType: "UserAgent"
+              status: "Active"
+              pairs: [
+                {
+                  source: {
+                    key: "Url",
+                    operator: "Equals",
+                    value: "https://www.google.com"
+                  },
+                  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                }
+              ]
+            schema:
+              $ref: '#/components/schemas/UserAgentRuleRequest'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "12345"
+                  lastModifiedBy: "user123"
+                  modificationDate: 1629567600000
+                  creationDate: 1629567600000
+                  createdBy: "user123"
+                  currentOwnerId: "user123"
+                  name: "Change UserAgent for Google"
+                  objectType: "rule"
+                  ruleType: "UserAgent"
+                  status: "Active"
+                  groupId: ""
+                  pairs: [
+                    {
+                      source: {
+                        key: "Url",
+                        operator: "Equals",
+                        value: "https://www.google.com"
+                      },
+                      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                    }
+                  ]
+                  isSample: false
+                  isFavourite: false
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+  /rules/{ruleId}:
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Change UserAgent for Google"
+              objectType: "rule"
+              ruleType: "UserAgent"
+              status: "Active"
+              pairs: [
+                {
+                  source: {
+                    key: "Url",
+                    operator: "Equals",
+                    value: "https://www.google.com"
+                  },
+                  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                }
+              ]
+            schema:
+              $ref: '#/components/schemas/UserAgentRuleRequest'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "12345"
+                  lastModifiedBy: "user123"
+                  modificationDate: 1629567600000
+                  creationDate: 1629567600000
+                  createdBy: "user123"
+                  currentOwnerId: "user123"
+                  name: "Change UserAgent for Google"
+                  objectType: "rule"
+                  ruleType: "UserAgent"
+                  status: "Active"
+                  groupId: ""
+                  pairs: [
+                    {
+                      source: {
+                        key: "Url",
+                        operator: "Equals",
+                        value: "https://www.google.com"
+                      },
+                      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                    }
+                  ]
+                  isSample: false
+                  isFavourite: false
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    RuleMetaData:
+      type: object
+      required:
+        - id
+        - lastModifiedBy
+        - modificationDate
+        - creationDate
+        - createdBy
+        - name
+        - objectType
+        - ruleType
+        - status
+        - groupId
+        - pairs
+        - isSample
+        - isFavourite
+      properties:
+        id:
+          type: string
+        lastModifiedBy:
+          type: string
+        modificationDate:
+          type: integer
+          format: int64
+        creationDate:
+          type: integer
+          format: int64
+        createdBy:
+          type: string
+        currentOwnerId:
+          type: string
+        name:
+          type: string
+        objectType:
+          type: string
+          enum: [rule]
+          default: rule
+        ruleType:
+          type: string
+          enum: [UserAgent]
+        status:
+          type: string
+          enum: [Active, Inactive]
+        groupId:
+          type: string
+          default: ""
+        pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAgentRulePair'
+        isSample:
+          type: boolean
+        isFavourite:
+          type: boolean
+
+    RulePairSource:
+      type: object
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+              resourceType:
+                type: array
+                items:
+                  type: string
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    UserAgentRuleRequest:
+      type: object
+      required:
+        - name
+        - objectType
+        - ruleType
+        - status
+        - pairs
+      properties:
+        name:
+          type: string
+        objectType:
+          type: string
+          enum: [rule]
+          default: rule
+        ruleType:
+          type: string
+          enum: [UserAgent]
+          default: UserAgent
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: Active
+        pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAgentRulePair'
+
+    UserAgentRulePair:
+      type: object
+      required: 
+        - source
+        - userAgent
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        userAgent:
+          type: string
+        env:
+          type: string
+        envType:
+          type: string
+          enum: [browser, device, custom]
+

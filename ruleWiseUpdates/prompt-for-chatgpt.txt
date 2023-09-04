@@ -1,0 +1,940 @@
+generate doc for modify response rule, here's the template 
+
+openapi: 3.0.0
+info:
+  title: Create / Update <Rule Type>
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              # appropriate example based on rule type
+            schema:
+              $ref: '#/components/schemas/<RuleType>RuleRequest'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  # appropriate example data for <Rule Type>
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+  /rules/{ruleId}:
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              # appropriate example based on rule type
+            schema:
+              $ref: '#/components/schemas/<RuleType>RuleRequest'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  # appropriate example data for <Rule Type>
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    RuleMetaData:
+      # ... (rule-specific RuleMetaData schema goes here)
+
+    RulePairSource:
+      type: object
+      description: Source URL or pattern.
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+              resourceType:
+                type: array
+                items:
+                  type: string
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    # rule type specific schemas for request, response, and pair
+
+
+and here's the original doc
+
+openapi: 3.0.0
+info:
+  title: New Rules API spec
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Cancel Rule for Blocked Site"
+              description: "This rule blocks access to blockedsite.com"
+              status: "Active"
+              ruleType: "Cancel"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Equals"
+                    value: "https://blockedsite.com"
+            schema:
+              $ref: '#/components/schemas/RULE_PAYLOAD'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  id: "Cancel_a1b2c"
+                  name: "Cancel Rule for Blocked Site"
+                  description: "This rule blocks access to blockedsite.com"
+                  status: "Active"
+                  ruleType: "Cancel"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://blockedsite.com"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+        
+
+
+    get:
+      responses:
+        '200':
+          description: Rules retrieved successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  - id: "Redirect_fohh4"
+                    name: "Sample Redirect Rule"
+                    description: "This rule redirects example.com to newexample.com"
+                    status: "Active"
+                    ruleType: "Redirect"
+                    pairs:
+                      - source:
+                          key: "Url"
+                          operator: "Equals"
+                          value: "https://example.com"
+                        destinationType: "url"
+                        destination: "https://newexample.com"
+                  - id: "Cancel_a1b2c"
+                    name: "Cancel Rule for Blocked Site"
+                    description: "This rule blocks access to blockedsite.com"
+                    status: "Active"
+                    ruleType: "Cancel"
+                    pairs:
+                      - source:
+                          key: "Url"
+                          operator: "Equals"
+                          value: "https://blockedsite.com"
+                  - id: "Replace_z5x6y"
+                    name: "Replace Rule for Typo"
+                    description: "This rule replaces typodomain.com with correctdomain.com"
+                    status: "Active"
+                    ruleType: "Replace"
+                    pairs:
+                      - source:
+                          key: "Url"
+                          operator: "Equals"
+                          value: "https://typodomain.com"
+                        from: "typodomain.com"
+                        to: "correctdomain.com"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Rule'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          description: Too Many Requests
+        
+
+  /rules/{ruleId}:
+    get:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rule retrieved successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  id: "Redirect_fohh4"
+                  name: "Sample Redirect Rule"
+                  description: "This rule redirects example.com to newexample.com"
+                  status: "Active"
+                  ruleType: "Redirect"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://example.com"
+                      destinationType: "url"
+                      destination: "https://newexample.com"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/Rule'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          description: Too Many Requests
+        
+
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Replace Rule for Typo"
+              description: "This rule replaces typodomain.com with correctdomain.com"
+              status: "Active"
+              ruleType: "Replace"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Equals"
+                    value: "https://typodomain.com"
+                  from: "typodomain.com"
+                  to: "correctdomain.com"
+            schema:
+              $ref: '#/components/schemas/RULE_PAYLOAD'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  id: "Replace_z5x6y"
+                  name: "Replace Rule for Typo"
+                  description: "This rule replaces typodomain.com with correctdomain.com"
+                  status: "Active"
+                  ruleType: "Replace"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://typodomain.com"
+                      from: "typodomain.com"
+                      to: "correctdomain.com"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+        
+
+    delete:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rule deleted successfully
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Rule successfully deleted."
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+        
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+    RULE_PAYLOAD:
+      type: object
+      required: 
+        - name
+        - ruleType
+        - pairs
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          default: "Describe what the rule does"
+        ruleType:
+          $ref: '#/components/schemas/RuleType'
+        status:
+          $ref: '#/components/schemas/Status'
+        groupId:
+          type: string
+          default: ''
+        isFavourite:
+          type: boolean
+          default: false
+        pairs:
+          type: array
+          default: [
+            {
+              "source": {
+                "key": "Url",
+                "operator": "Equals",
+                "value": "https://www.google.com"
+              },
+              "destinationType": "url",
+              "destination": "https://www.requestly.io"
+            }
+          ]
+          items:
+            discriminator:
+              propertyName: ruleType
+              mapping:
+                Redirect: '#/components/schemas/RedirectRulePair'
+                Cancel: '#/components/schemas/CancelRulePair'
+                Replace: '#/components/schemas/ReplaceRulePair'
+                Headers: '#/components/schemas/HeadersRulePair'
+                UserAgent: '#/components/schemas/UserAgentRulePair'
+                QueryParam: '#/components/schemas/QueryParamRulePair'
+                Response: '#/components/schemas/ResponseRulePair'
+                Request: '#/components/schemas/RequestRulePair'
+                Delay: '#/components/schemas/DelayRulePair'
+            oneOf:
+              - $ref: '#/components/schemas/RedirectRulePair'
+              - $ref: '#/components/schemas/CancelRulePair'
+              - $ref: '#/components/schemas/ReplaceRulePair'
+              - $ref: '#/components/schemas/HeadersRulePair'
+              - $ref: '#/components/schemas/UserAgentRulePair'
+              - $ref: '#/components/schemas/QueryParamRulePair'
+              - $ref: '#/components/schemas/ResponseRulePair'
+              - $ref: '#/components/schemas/RequestRulePair'
+              - $ref: '#/components/schemas/DelayRulePair'
+
+    RuleType:
+      type: string
+      enum: [Redirect, Cancel, Replace, Headers, UserAgent, Script, QueryParam, Response, Request, Delay]
+      default: 'Redirect'
+
+    Status:
+      type: string
+      enum: [Active, Inactive]
+      default: 'Active'
+
+    Rule:
+      type: object
+      properties:
+        id:
+          type: string
+        lastModifiedBy:
+          type: string
+        modificationDate:
+          type: integer
+        creationDate:
+          type: integer
+        createdBy:
+          type: string
+        currentOwnerId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        objectType:
+          type: string
+          enum: [group, rule]
+        ruleType:
+          $ref: '#/components/schemas/RuleType'
+        status:
+          $ref: '#/components/schemas/Status'
+        groupId:
+          type: string
+        pairs:
+          type: array
+          items:
+            # $ref: '#/components/schemas/RulePair'
+            discriminator:
+              propertyName: ruleType
+              mapping:
+                Redirect: '#/components/schemas/RedirectRulePair'
+                Cancel: '#/components/schemas/CancelRulePair'
+                Replace: '#/components/schemas/ReplaceRulePair'
+                Headers: '#/components/schemas/HeadersRulePair'
+                UserAgent: '#/components/schemas/UserAgentRulePair'
+                QueryParam: '#/components/schemas/QueryParamRulePair'
+                Response: '#/components/schemas/ResponseRulePair'
+                Request: '#/components/schemas/RequestRulePair'
+                Delay: '#/components/schemas/DelayRulePair'
+            oneOf:
+              - $ref: '#/components/schemas/RedirectRulePair'
+              - $ref: '#/components/schemas/CancelRulePair'
+              - $ref: '#/components/schemas/ReplaceRulePair'
+              - $ref: '#/components/schemas/HeadersRulePair'
+              - $ref: '#/components/schemas/UserAgentRulePair'
+              - $ref: '#/components/schemas/QueryParamRulePair'
+              - $ref: '#/components/schemas/ResponseRulePair'
+              - $ref: '#/components/schemas/RequestRulePair'
+              - $ref: '#/components/schemas/DelayRulePair'
+        isSample:
+          type: boolean
+        isFavourite:
+          type: boolean
+    RulePairSource:
+      type: object
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+              resourceType:
+                type: array
+                items:
+                  type: string
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    RedirectRulePair:
+      type: object
+      required: 
+        - source
+        - destinationType
+        - destination
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        destinationType:
+          type: string
+          enum: [url, map_local, mock_or_file_picker]
+        destination:
+          type: string
+
+    CancelRulePair:
+      type: object
+      required: 
+        - source
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+
+    ReplaceRulePair:
+      type: object
+      required: 
+        - source
+        - from
+        - to
+      properties:
+        source:
+          $ref: '#/components/schemas/RulePairSource'
+        from:
+          type: string
+        to:
+          type: string
+
+    HeadersRulePair:
+      type: object
+      required: 
+        - source
+        - modifications
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        modifications:
+          type: object
+          required: 
+            - Request
+            - Response
+          default: {}
+          properties:
+            Request:
+              type: array
+              items:
+                $ref: '#/components/schemas/HeadersRuleModificationData'
+            Response:
+              type: array
+              items:
+                $ref: '#/components/schemas/HeadersRuleModificationData'
+
+    HeadersRuleModificationData:
+      type: object
+      required: 
+        - header
+        - type
+      properties:
+        header:
+          type: string
+        type:
+          type: string
+          enum: [Add, Remove, Modify]
+          default: Add
+        value:
+          type: string
+
+    UserAgentRulePair:
+      type: object
+      required: 
+        - source
+        - userAgent
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        userAgent:
+          type: string
+          default: "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion"
+          example: "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion"
+        env:
+          type: string
+        envType:
+          type: string
+          enum: [browser, device, custom]
+          default: device
+
+    QueryParamRulePair:
+      type: object
+      required: 
+        - source
+        - modifications
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        modifications:
+          type: array
+          default: []
+          items:
+            $ref: '#/components/schemas/QueryParamRuleModification'
+
+    QueryParamRuleModification:
+      type: object
+      required: 
+        - param
+        - type
+      properties:
+        param:
+          type: string
+        value:
+          type: string
+        type:
+          type: string
+          enum: [Add, Remove, Remove]
+          default: Add
+
+    ResponseRulePair:
+      type: object
+      required: 
+        - source
+        - response
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        response:
+          type: object
+          example: {
+            "type": "code",
+            "value": 'function modifyResponse(args) {
+                const {method, url, response, responseType, requestHeaders, requestData, responseJSON} = args;
+                console.log("method", method)
+                
+                return response;
+              }',
+            "resourceType": "restApi",
+            "statusCode": "200"
+          }
+          properties:
+            type:
+              type: string
+              enum: [code, static]
+              default: static
+            value:
+              type: string
+              default: '{"foo": "bar"}'
+            resourceType:
+              type: string
+              enum: [restApi, graphqlApi, static]
+              default: restApi
+            statusCode:
+              type: string
+              default: '200'
+
+    RequestRulePair:
+      type: object
+      required: 
+        - source
+        - request
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        request:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [code, static]
+              default: static
+            value:
+              type: string
+              default: '{"foo": "bar"}'
+            statusCode:
+              type: string
+              default: '200'
+
+    DelayRulePair:
+      type: object
+      required: 
+        - source
+        - delay
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        delay:
+          type: string
+
+    RuleMetaData:
+      type: object
+      required:
+        - id
+        - lastModifiedBy
+        - modificationDate
+        - creationDate
+        - createdBy
+        - name
+        - description
+        - objectType
+        - ruleType
+        - status
+        - groupId
+        - pairs
+        - isSample
+        - isFavourite
+      properties:
+        id:
+          type: string
+        lastModifiedBy:
+          type: string
+        modificationDate:
+          type: integer
+          format: int64
+        creationDate:
+          type: integer
+          format: int64
+        createdBy:
+          type: string
+        currentOwnerId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        objectType:
+          type: string
+          enum: [rule]
+          default: rule
+        ruleType:
+          $ref: '#/components/schemas/RuleType'
+        status:
+          type: string
+          enum: [Active, Inactive]
+        groupId:
+          type: string
+          default: ""
+        pairs:
+          type: array
+          items:
+            discriminator:
+              propertyName: ruleType
+              mapping:
+                Redirect: '#/components/schemas/RedirectRulePair'
+                Cancel: '#/components/schemas/CancelRulePair'
+                Replace: '#/components/schemas/ReplaceRulePair'
+                Headers: '#/components/schemas/HeadersRulePair'
+                UserAgent: '#/components/schemas/UserAgentRulePair'
+                QueryParam: '#/components/schemas/QueryParamRulePair'
+                Response: '#/components/schemas/ResponseRulePair'
+                Request: '#/components/schemas/RequestRulePair'
+                Delay: '#/components/schemas/DelayRulePair'
+            oneOf:
+              - $ref: '#/components/schemas/RedirectRulePair'
+              - $ref: '#/components/schemas/CancelRulePair'
+              - $ref: '#/components/schemas/ReplaceRulePair'
+              - $ref: '#/components/schemas/HeadersRulePair'
+              - $ref: '#/components/schemas/UserAgentRulePair'
+              - $ref: '#/components/schemas/QueryParamRulePair'
+              - $ref: '#/components/schemas/ResponseRulePair'
+              - $ref: '#/components/schemas/RequestRulePair'
+              - $ref: '#/components/schemas/DelayRulePair'
+        isSample:
+          type: boolean
+        isFavourite:
+          type: boolean

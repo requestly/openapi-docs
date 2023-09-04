@@ -1,0 +1,315 @@
+openapi: 3.0.0
+info:
+  title: Script Rule
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Agoda: Use dark header"
+              ruleType: "Script"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Contains"
+                    value: "https://www.agoda.com"
+                  scripts:
+                    - codeType: "css"
+                      loadTime: "afterPageLoad"
+                      type: "code"
+                      value: ".disNST {...}"
+            schema:
+              $ref: '#/components/schemas/ScriptRuleRequest'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  # appropriate example data for Script
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+  /rules/{ruleId}:
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Agoda: Use dark header"
+              ruleType: "Script"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Contains"
+                    value: "https://www.agoda.com"
+                  scripts:
+                    - codeType: "css"
+                      loadTime: "afterPageLoad"
+                      type: "code"
+                      value: ".disNST {...}"
+            schema:
+              $ref: '#/components/schemas/ScriptRuleRequest'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  # appropriate example data for Script
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    RuleMetaData:
+      type: object
+      properties:
+        createdBy:
+          type: string
+          description: ID of the user who created the rule.
+        creationDate:
+          type: integer
+          format: int64
+          description: Timestamp of when the rule was created.
+        currentOwner:
+          type: string
+          description: ID of the current owner of the rule.
+        description:
+          type: string
+          description: Description of the rule.
+        groupId:
+          type: string
+          description: ID of the group to which the rule belongs.
+        id:
+          type: string
+          description: Unique ID of the rule.
+        isSample:
+          type: boolean
+          description: Indicates if the rule is a template.
+        lastModifiedBy:
+          type: string
+          description: ID of the user who last modified the rule.
+        modificationDate:
+          type: integer
+          format: int64
+          description: Timestamp of when the rule was last modified.
+        name:
+          type: string
+          description: Name of the rule.
+        objectType:
+          type: string
+          description: Type of the object (should be "rule" ).
+        ruleType:
+          type: string
+          description: Type of the rule (should be "Script" for script rules).
+        status:
+          type: string
+          description: Status of the rule (e.g., "Active").
+      required:
+        - createdBy
+        - creationDate
+        - currentOwner
+        - groupId
+        - id
+        - isSample
+        - lastModifiedBy
+        - modificationDate
+        - name
+        - objectType
+        - ruleType
+        - status
+
+
+    RulePairSource:
+      type: object
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+                  enum: [GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS]
+                  example: GET
+              resourceType:
+                type: array
+                items:
+                  type: string
+                  enum: [xmlhttprequest, script, stylesheet, image, media, font, websocket, main_frame, sub_frame]
+                  example: script
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    ScriptRuleRequest:
+      type: object
+      required:
+        - name
+        - ruleType
+        - pairs
+      properties:
+        name:
+          type: string
+          default: Insert Script Rule
+        ruleType:
+          type: string
+          enum: [Script]
+          default: Script
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: Inactive
+        pairs:
+          type: array
+          items:
+            type: object
+            required: 
+              - scripts
+              - source
+            properties:
+              scripts:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - codeType
+                    - loadTime
+                    - type
+                    - value
+                  properties:
+                    source: 
+                      $ref: '#/components/schemas/RulePairSource'
+                    codeType:
+                      type: string
+                      enum: [css, js]
+                      default: js
+                    fileName:
+                      type: string
+                    loadTime:
+                      type: string
+                      enum: [afterPageLoad, beforePageLoad]
+                      default: afterPageLoad
+                    type:
+                      type: string
+                      enum: [code, file]
+                      default: code
+                    value:
+                      type: string
+                      default: "console.log('Hello World');"
+              

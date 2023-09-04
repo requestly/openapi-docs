@@ -1,0 +1,303 @@
+openapi: 3.0.0
+info:
+  title: Create / Update RequestRule
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Modify Request for Testing"
+              description: "This rule modifies the request payload"
+              status: "Active"
+              ruleType: "Request"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Equals"
+                    value: "https://testwebsite.com"
+                  request:
+                    type: "code"
+                    value: '{"foo": "modified"}'
+                    statusCode: "200"
+            schema:
+              $ref: '#/components/schemas/RequestRuleRequest'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "Request_x9y0z"
+                  name: "Modify Request for Testing"
+                  description: "This rule modifies the request payload"
+                  status: "Active"
+                  ruleType: "Request"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://testwebsite.com"
+                      request:
+                        type: "code"
+                        value: '{"foo": "modified"}'
+                        statusCode: "200"
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+  /rules/{ruleId}:
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Modify Request for Testing"
+              description: "This rule modifies the request payload"
+              status: "Active"
+              ruleType: "Request"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Equals"
+                    value: "https://testwebsite.com"
+                  request:
+                    type: "code"
+                    value: '{"foo": "modified"}'
+                    statusCode: "200"
+            schema:
+              $ref: '#/components/schemas/RequestRuleRequest'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "Request_x9y0z"
+                  name: "Modify Request for Testing"
+                  description: "This rule modifies the request payload"
+                  status: "Active"
+                  ruleType: "Request"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://testwebsite.com"
+                      request:
+                        type: "code"
+                        value: '{"foo": "modified"}'
+                        statusCode: "200"
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    RuleMetaData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        ruleType:
+          type: string
+        pairs:
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                $ref: '#/components/schemas/RulePairSource'
+              request:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  value:
+                    type: string
+                  statusCode:
+                    type: string
+
+    RulePairSource:
+      type: object
+      description: Source URL or pattern.
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+                  enum: [GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS]
+                  example: GET
+              resourceType:
+                type: array
+                items:
+                  type: string
+                  enum: [xmlhttprequest, script, stylesheet, image, media, font, websocket, main_frame, sub_frame]
+                  example: script
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    RequestRuleRequest:
+      type: object
+      required: 
+        - name
+        - ruleType
+        - pairs
+      properties:
+        name:
+          type: string
+          default: "Modify Request Rule for Testing"
+        description:
+          type: string
+          default: "This rule modifies the request payload"
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: Inactive
+        ruleType:
+          type: string
+          enum: [Request]
+          default: Request
+        pairs:
+          type: array
+          items:
+            type: object
+            required:
+              - source
+              - request
+            properties:
+              source:
+                $ref: '#/components/schemas/RulePairSource'
+              request:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [code, static]
+                    default: static
+                  value:
+                    type: string
+                    example: '{"foo": "bar"}'
+                  statusCode:
+                    type: string  
+                    default: '200'

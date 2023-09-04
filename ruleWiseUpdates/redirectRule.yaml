@@ -1,0 +1,365 @@
+openapi: 3.0.0
+info:
+  title: Create / Update Redirect Rule
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Redirect Google to Bing"
+              description: "A rule to redirect Google searches to Bing"
+              objectType: "rule"
+              ruleType: "Redirect"
+              status: "Active"
+              pairs: [
+                {
+                  source: {
+                    key: "url",
+                    operator: "Equals",
+                    value: "https://www.google.com"
+                  },
+                  destination: "https://www.bing.com"
+                }
+              ]
+            schema:
+              $ref: '#/components/schemas/RedirectRuleRequest'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "12345"
+                  lastModifiedBy: "user123"
+                  modificationDate: 1629567600000
+                  creationDate: 1629567600000
+                  createdBy: "user123"
+                  currentOwnerId: "user123"
+                  name: "Redirect Google to Bing"
+                  description: "A rule to redirect Google searches to Bing"
+                  objectType: "rule"
+                  ruleType: "Redirect"
+                  status: "Active"
+                  groupId: ""
+                  pairs: [
+                    {
+                      source: {
+                        key: "url",
+                        operator: "Equals",
+                        value: "https://www.google.com"
+                      },
+                      destination: "https://www.bing.com"
+                    }
+                  ]
+                  isSample: false
+                  isFavourite: false
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+  /rules/{ruleId}:
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Redirect Google to Bing"
+              description: "A rule to redirect Google searches to Bing"
+              objectType: "rule"
+              ruleType: "Redirect"
+              status: "Active"
+              pairs: [
+                {
+                  source: {
+                    key: "url",
+                    operator: "Equals",
+                    value: "https://www.google.com"
+                  },
+                  destination: "https://www.bing.com"
+                }
+              ]
+            schema:
+              $ref: '#/components/schemas/RedirectRuleRequest'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "12345"
+                  lastModifiedBy: "user123"
+                  modificationDate: 1629567600000
+                  creationDate: 1629567600000
+                  createdBy: "user123"
+                  currentOwnerId: "user123"
+                  name: "Redirect Google to Bing"
+                  description: "A rule to redirect Google searches to Bing"
+                  objectType: "rule"
+                  ruleType: "Redirect"
+                  status: "Active"
+                  groupId: ""
+                  pairs: [
+                    {
+                      source: {
+                        key: "url",
+                        operator: "Equals",
+                        value: "https://www.google.com"
+                      },
+                      destination: "https://www.bing.com"
+                    }
+                  ]
+                  isSample: false
+                  isFavourite: false
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    RuleMetaData:
+      type: object
+      required:
+        - id
+        - lastModifiedBy
+        - modificationDate
+        - creationDate
+        - createdBy
+        - name
+        - description
+        - objectType
+        - ruleType
+        - status
+        - groupId
+        - pairs
+        - isSample
+        - isFavourite
+      properties:
+        id:
+          type: string
+        lastModifiedBy:
+          type: string
+        modificationDate:
+          type: integer
+          format: int64
+        creationDate:
+          type: integer
+          format: int64
+        createdBy:
+          type: string
+        currentOwnerId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        objectType:
+          type: string
+          enum: [rule]
+          default: rule
+        ruleType:
+          type: string
+          enum: [Redirect]
+        status:
+          type: string
+          enum: [Active, Inactive]
+        groupId:
+          type: string
+          default: ""
+        pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/RedirectRulePair'
+        isSample:
+          type: boolean
+        isFavourite:
+          type: boolean
+
+    RulePairSource:
+      type: object
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      description: Source URL or pattern.
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+                  enum: [GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS]
+                  example: GET
+              resourceType:
+                type: array
+                items:
+                  type: string
+                  enum: [xmlhttprequest, script, stylesheet, image, media, font, websocket, main_frame, sub_frame]
+                  example: script
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    RedirectRuleRequest:
+      type: object
+      required:
+        - name
+        - objectType
+        - ruleType
+        - status
+        - pairs
+      properties:
+        name:
+          type: string
+          description: Name of the rule.
+        description:
+          type: string
+          description: Description of the rule.
+        objectType:
+          type: string
+          enum: [rule]
+          default: rule
+          description: Type of the object. For this schema, it's always 'rule'.
+        ruleType:
+          type: string
+          enum: [Redirect]
+          default: Redirect
+          description: Type of the rule. For this schema, it's 'Redirect'.
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: Active
+          description: Status of the rule, either 'Active' or 'Inactive'.
+        pairs:
+          type: array
+          description: List of rule pairs for the redirect rule.
+          items:
+            $ref: '#/components/schemas/RedirectRulePair'
+
+
+    RedirectRulePair:
+      type: object
+      required:
+        - source
+        - destination
+      properties:
+        source:
+          $ref: '#/components/schemas/RulePairSource'
+        destination:
+          type: string
+          description: Destination URL for the redirect.
+        destinationType:
+          type: string
+          enum: [url, map_local, mock_or_file_picker]
+          default: url
+          description: Type of the destination. For this schema, it's always 'url'.
+

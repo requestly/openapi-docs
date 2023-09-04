@@ -1,0 +1,270 @@
+openapi: 3.0.0
+info:
+  title: Delay Rule
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /rules:
+    post:
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Delay Rule for Slow Site"
+              description: "This rule introduces a delay for slowwebsite.com"
+              status: "Active"
+              ruleType: "Delay"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Equals"
+                    value: "https://slowwebsite.com"
+                  delay: "5000"
+            schema:
+              $ref: '#/components/schemas/DelayRuleRequest'
+      responses:
+        '200':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "Delay_x7y8z"
+                  name: "Delay Rule for Slow Site"
+                  description: "This rule introduces a delay for slowwebsite.com"
+                  status: "Active"
+                  ruleType: "Delay"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://slowwebsite.com"
+                      delay: "5000"
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+  /rules/{ruleId}:
+    put:
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: "Delay Rule for Slow Site"
+              description: "This rule introduces a delay for slowwebsite.com"
+              status: "Active"
+              ruleType: "Delay"
+              pairs:
+                - source:
+                    key: "Url"
+                    operator: "Equals"
+                    value: "https://slowwebsite.com"
+                  delay: "5000"
+            schema:
+              $ref: '#/components/schemas/DelayRuleRequest'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/RuleMetaData'
+              example:
+                success: true
+                data:
+                  id: "Delay_x7y8z"
+                  name: "Delay Rule for Slow Site"
+                  description: "This rule introduces a delay for slowwebsite.com"
+                  status: "Active"
+                  ruleType: "Delay"
+                  pairs:
+                    - source:
+                        key: "Url"
+                        operator: "Equals"
+                        value: "https://slowwebsite.com"
+                      delay: "5000"
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '429':
+          description: Too Many Requests
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequestResponse:
+      description: Rule pairs or payload are invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    NotFoundResponse:
+      description: Rule or group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    MethodNotAllowedResponse:
+      description: Rule type update not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    RuleMetaData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        ruleType:
+          type: string
+        pairs:
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                $ref: '#/components/schemas/RulePairSource'
+              delay:
+                type: string
+
+    RulePairSource:
+      type: object
+      description: Source URL or pattern.
+      example: {
+        "key": "Url",
+        "operator": "Equals",
+        "value": "https://www.google.com"
+      }
+      required: 
+        - key
+        - operator
+        - value
+      properties:
+        key:
+          type: string
+          enum: [Url, host, path]
+          default: Url
+        operator:
+          type: string
+          enum: [Equals, Contains, Matches, Wildcard_Matches]
+          default: Equals
+        value:
+          type: string
+        filters:
+          type: array
+          default: []
+          items:
+            type: object
+            properties:
+              requestMethod:
+                type: array
+                items:
+                  type: string
+              resourceType:
+                type: array
+                items:
+                  type: string
+              requestPayload:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+
+    DelayRuleRequest:
+      type: object
+      required: 
+        - name
+        - description
+        - status
+        - ruleType
+        - pairs
+      properties:
+        name:
+          type: string
+          example: "Delay Rule to simulate slowness"
+        description:
+          type: string
+          example: "This rule introduces a delay for fastwebsite.com"
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: 'Inactive'
+        ruleType:
+          type: string
+          enum: [Delay]
+          default: Delay
+        pairs:
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                $ref: '#/components/schemas/RulePairSource'
+              delay:
+                type: string
+                description: Delay in milliseconds
+                example: 5000
