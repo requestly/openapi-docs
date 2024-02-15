@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  title: Group Management API
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /groups/{id}:
+    put:
+      summary: Update a specific group
+      description: Modifies the details of an existing group identified by its unique ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The unique identifier of the group to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: "Updated Group Name"
+              status: "Inactive"
+              isFavourite: true
+            schema:
+              $ref: '#/components/schemas/GROUP_PAYLOAD'
+      responses:
+        '200':
+          description: Group updated successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  id: "group_id"
+                  name: "Updated Group Name"
+                  status: "Inactive"
+                  isFavourite: true
+                  lastModifiedBy: "user456"
+                  modificationDate: 1707894488025
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GroupMetaData'
+        '400':
+          $ref: '#/components/responses/InvalidGroupId'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GroupNotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    InvalidGroupId:
+      description: The provided group ID is invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    GroupNotFoundResponse:
+      description: The specified group does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    InternalServerError:
+      description: An error occurred on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    GROUP_PAYLOAD:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: 'Active'
+        isFavourite:
+          type: boolean
+          default: false
+
+    GroupMetaData:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - lastModifiedBy
+        - modificationDate
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the group
+        name:
+          type: string
+          description: Name of the group
+        status:
+          type: string
+          enum: [Active, Inactive]
+          description: Status of the group
+        isFavourite:
+          type: boolean
+          description: Indicates whether the group is marked as a favourite
+        lastModifiedBy:
+          type: string
+          description: Identifier of the last user who modified the group
+        modificationDate:
+          type: integer
+          format: int64
+          description: Timestamp of the last modification to the group

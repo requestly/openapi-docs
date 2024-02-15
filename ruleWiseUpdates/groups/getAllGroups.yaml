@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Group Management API
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /groups:
+    get:
+      summary: Retrieve a list of all groups
+      description: Fetches details of all the groups available in the system.
+      responses:
+        '200':
+          description: List of groups retrieved successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data: 
+                  - id: "Group_1a2b3c"
+                    name: "Sample Group A"
+                    status: "Active"
+                    isFavourite: false
+                  - id: "Group_4d5e6f"
+                    name: "Sample Group B"
+                    status: "Inactive"
+                    isFavourite: true
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the fetch was successful
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    InternalServerError:
+      description: An error occurred on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+        message:
+          type: string
+          description: Descriptive message about the operation result
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the group
+        name:
+          type: string
+          description: Name of the group
+        status:
+          type: string
+          enum: [Active, Inactive]
+          description: Status of the group
+        isFavourite:
+          type: boolean
+          description: Indicates whether the group is marked as a favourite

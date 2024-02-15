@@ -2,189 +2,6 @@ generate doc for modify response rule, here's the template
 
 openapi: 3.0.0
 info:
-  title: Create / Update <Rule Type>
-  version: 1.0.0
-servers:
-  - url: https://api2.requestly.io/v1
-security:
-  - ApiKeyAuth: []
-
-paths:
-  /rules:
-    post:
-      requestBody:
-        content:
-          application/json:
-            example:
-              # appropriate example based on rule type
-            schema:
-              $ref: '#/components/schemas/<RuleType>RuleRequest'
-      responses:
-        '200':
-          description: Rule created successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    $ref: '#/components/schemas/RuleMetaData'
-              example:
-                success: true
-                data:
-                  # appropriate example data for <Rule Type>
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '404':
-          $ref: '#/components/responses/NotFoundResponse'
-        '405':
-          $ref: '#/components/responses/MethodNotAllowedResponse'
-        '429':
-          description: Too Many Requests
-
-  /rules/{ruleId}:
-    put:
-      parameters:
-        - name: ruleId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            example:
-              # appropriate example based on rule type
-            schema:
-              $ref: '#/components/schemas/<RuleType>RuleRequest'
-      responses:
-        '200':
-          description: Rule updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    $ref: '#/components/schemas/RuleMetaData'
-              example:
-                success: true
-                data:
-                  # appropriate example data for <Rule Type>
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '404':
-          $ref: '#/components/responses/NotFoundResponse'
-        '405':
-          $ref: '#/components/responses/MethodNotAllowedResponse'
-        '429':
-          description: Too Many Requests
-
-components:
-  securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: x-api-key
-
-  responses:
-    BadRequestResponse:
-      description: Rule pairs or payload are invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CommonResponse'
-    UnauthorizedResponse:
-      description: Unauthorized action
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CommonResponse'
-    NotFoundResponse:
-      description: Rule or group not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CommonResponse'
-    MethodNotAllowedResponse:
-      description: Rule type update not allowed
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CommonResponse'
-
-  schemas:
-    CommonResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-
-    RuleMetaData:
-      # ... (rule-specific RuleMetaData schema goes here)
-
-    RulePairSource:
-      type: object
-      description: Source URL or pattern.
-      example: {
-        "key": "Url",
-        "operator": "Equals",
-        "value": "https://www.google.com"
-      }
-      required: 
-        - key
-        - operator
-        - value
-      properties:
-        key:
-          type: string
-          enum: [Url, host, path]
-          default: Url
-        operator:
-          type: string
-          enum: [Equals, Contains, Matches, Wildcard_Matches]
-          default: Equals
-        value:
-          type: string
-        filters:
-          type: array
-          default: []
-          items:
-            type: object
-            properties:
-              requestMethod:
-                type: array
-                items:
-                  type: string
-              resourceType:
-                type: array
-                items:
-                  type: string
-              requestPayload:
-                type: object
-                properties:
-                  key:
-                    type: string
-                  value:
-                    type: string
-
-    # rule type specific schemas for request, response, and pair
-
-
-and here's the original doc
-
-openapi: 3.0.0
-info:
   title: New Rules API spec
   version: 1.0.0
 servers:
@@ -455,6 +272,225 @@ paths:
           description: Too Many Requests
         
 
+  /groups:
+    get:
+      summary: Retrieve a list of groups
+      responses:
+        '200':
+          description: List of groups retrieved successfully
+          content:
+            application/json:
+             example:
+              success: true
+              data: 
+                - id: "Group_1a2b3c"
+                  createdBy: "user123"
+                  creationDate: 1707893324459
+                  currentOwnerId: "user123"
+                  lastModifiedBy: "user123"
+                  modificationDate: 1707893326371
+                  name: "Group A"
+                  objectType: "group"
+                  status: "Active"
+                  isFavourite: false
+                - id: "Group_4d5e6f"
+                  createdBy: "user456"
+                  creationDate: 1707893324459
+                  currentOwnerId: "user456"
+                  lastModifiedBy: "user456"
+                  modificationDate: 1707893326371
+                  name: "Group B"
+                  objectType: "group"
+                  status: "Inactive"
+                  isFavourite: true
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/InvalidGroupPayload'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: "New Awesome Group"
+              status: "Active"
+            schema:
+              $ref: '#/components/schemas/GROUP_PAYLOAD'
+      responses:
+        '200':
+          description: Group created successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data: 
+                  id: "Group_7h8i9j"
+                  creationDate: 1707893421467
+                  modificationDate: 1707893421467
+                  createdBy: "Gw9geGxr4aWejyB1erPKMnyFNNZW"
+                  lastModifiedBy: "Gw9geGxr4aWejyB1erPKMnyFNNZW"
+                  name: "New Group"
+                  objectType: "group"
+                  status: "Active"
+                  isFavourite: false
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GroupMetaData'
+        '400':
+          $ref: '#/components/responses/InvalidGroupPayload'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/GroupNameRequired'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
+  /groups/{id}:
+    get:
+      summary: Retrieve a specific group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group retrieved successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data: 
+                  id: "Group_4d5e6f"
+                  createdBy: "user456"
+                  creationDate: 1707893324459
+                  currentOwnerId: "user456"
+                  lastModifiedBy: "user123"
+                  modificationDate: 1707894488025
+                  name: "Group B"
+                  objectType: "group"
+                  status: "Inactive"
+                  isFavourite: true
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/InvalidGroupId'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GroupNotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'     
+
+    put:
+      summary: Update a specific group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: "Updated Group Name"
+              status: "Inactive"
+            schema:
+              $ref: '#/components/schemas/GROUP_PAYLOAD'
+      responses:
+        '200':
+          description: Group updated successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data: 
+                  id: "Group_4d5e6f"
+                  creationDate: 1707893421467
+                  modificationDate: 1707894488025
+                  createdBy: "user456"
+                  lastModifiedBy: "Gw9geGxr4aWejyB1erPKMnyFNNZW"
+                  name: "now this is active"
+                  objectType: "group"
+                  status: "Active"
+                  isFavourite: false
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GroupMetaData'
+        '400':
+          $ref: '#/components/responses/InvalidGroupId'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GroupNotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete a specific group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group deleted successfully
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Group successfully deleted."
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/InvalidGroupId'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GroupNotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
+
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -488,6 +524,36 @@ components:
           schema:
             $ref: '#/components/schemas/CommonResponse'
 
+    InvalidGroupPayload:
+      description: Group payload is not valid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    InvalidGroupId:
+      description: Invalid Group Id
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    GroupNameRequired:
+      description: Group name is required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    GroupNotFoundResponse:
+      description: Group not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
   schemas:
     CommonResponse:
         type: object
@@ -535,6 +601,7 @@ components:
             discriminator:
               propertyName: ruleType
               mapping:
+                Script: '#/components/schemas/ScriptRulePair'
                 Redirect: '#/components/schemas/RedirectRulePair'
                 Cancel: '#/components/schemas/CancelRulePair'
                 Replace: '#/components/schemas/ReplaceRulePair'
@@ -545,6 +612,7 @@ components:
                 Request: '#/components/schemas/RequestRulePair'
                 Delay: '#/components/schemas/DelayRulePair'
             oneOf:
+              - $ref: '#/components/schemas/ScriptRulePair'
               - $ref: '#/components/schemas/RedirectRulePair'
               - $ref: '#/components/schemas/CancelRulePair'
               - $ref: '#/components/schemas/ReplaceRulePair'
@@ -563,7 +631,7 @@ components:
     Status:
       type: string
       enum: [Active, Inactive]
-      default: 'Active'
+      default: 'Inactive'
 
     Rule:
       type: object
@@ -600,6 +668,7 @@ components:
             discriminator:
               propertyName: ruleType
               mapping:
+                Script: '#/components/schemas/ScriptRulePair'
                 Redirect: '#/components/schemas/RedirectRulePair'
                 Cancel: '#/components/schemas/CancelRulePair'
                 Replace: '#/components/schemas/ReplaceRulePair'
@@ -610,6 +679,7 @@ components:
                 Request: '#/components/schemas/RequestRulePair'
                 Delay: '#/components/schemas/DelayRulePair'
             oneOf:
+              - $ref: '#/components/schemas/ScriptRulePair'
               - $ref: '#/components/schemas/RedirectRulePair'
               - $ref: '#/components/schemas/CancelRulePair'
               - $ref: '#/components/schemas/ReplaceRulePair'
@@ -655,10 +725,14 @@ components:
                 type: array
                 items:
                   type: string
+                  enum: [GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS]
+                  example: GET
               resourceType:
                 type: array
                 items:
                   type: string
+                  enum: [xmlhttprequest, script, stylesheet, image, media, font, websocket, main_frame, sub_frame]
+                  example: script
               requestPayload:
                 type: object
                 properties:
@@ -788,8 +862,36 @@ components:
           type: string
         type:
           type: string
-          enum: [Add, Remove, Remove]
+          enum: [Add, Remove, Modify]
           default: Add
+
+    ScriptRulePair:
+      type: object
+      required: 
+        - source
+        - scripts
+      properties:
+        source: 
+          $ref: '#/components/schemas/RulePairSource'
+        scripts:
+          type: array
+          items:
+            type: object
+            properties:
+              codeType:
+                type: string
+                enum: [js, css]
+                default: js
+              fileName:
+                type: string
+              loadTime:
+                type: string
+                default: "afterPageLoad"
+              type:
+                type: string
+                enum: [code]
+              value:
+                type: string
 
     ResponseRulePair:
       type: object
@@ -915,6 +1017,7 @@ components:
             discriminator:
               propertyName: ruleType
               mapping:
+                Script: '#/components/schemas/ScriptRulePair'
                 Redirect: '#/components/schemas/RedirectRulePair'
                 Cancel: '#/components/schemas/CancelRulePair'
                 Replace: '#/components/schemas/ReplaceRulePair'
@@ -925,6 +1028,7 @@ components:
                 Request: '#/components/schemas/RequestRulePair'
                 Delay: '#/components/schemas/DelayRulePair'
             oneOf:
+              - $ref: '#/components/schemas/ScriptRulePair'
               - $ref: '#/components/schemas/RedirectRulePair'
               - $ref: '#/components/schemas/CancelRulePair'
               - $ref: '#/components/schemas/ReplaceRulePair'
@@ -938,3 +1042,81 @@ components:
           type: boolean
         isFavourite:
           type: boolean
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status: 
+          $ref: '#/components/schemas/Status'
+        isFavourite:
+          type: boolean
+        objectType:
+          type: string
+          enum: [group, rule]
+
+    GROUP_PAYLOAD:
+      type: object
+      required: 
+        - name
+      properties:
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        isFavourite:
+          type: boolean
+
+    
+    GroupMetaData:
+      type: object
+      required:
+        - id
+        - lastModifiedBy
+        - modificationDate
+        - creationDate
+        - createdBy
+        - name
+        - objectType
+        - status
+        - isFavourite
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the group
+        lastModifiedBy:
+          type: string
+          description: Identifier of the last user who modified the group
+        modificationDate:
+          type: integer
+          format: int64
+          description: Timestamp of the last modification to the group
+        creationDate:
+          type: integer
+          format: int64
+          description: Timestamp of when the group was created
+        createdBy:
+          type: string
+          description: Identifier of the user who created the group
+        currentOwnerId:
+          type: string
+          description: Identifier of the current owner of the group
+        name:
+          type: string
+          description: Name of the group
+        objectType:
+          type: string
+          enum: [group]
+          default: group
+          description: Type of the object, which is 'group' in this case
+        status:
+          type: string
+          enum: [Active, Inactive]
+          description: Status of the group, either Active or Inactive
+        isFavourite:
+          type: boolean
+          description: Indicates whether the group is pinned or not
+

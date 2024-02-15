@@ -1,0 +1,151 @@
+openapi: 3.0.0
+info:
+  title: Group Management API
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /groups:
+    post:
+      summary: Create a new group
+      description: Adds a new group with the provided details to the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: "New Example Group"
+              status: "Active"
+            schema:
+              $ref: '#/components/schemas/GROUP_PAYLOAD'
+      responses:
+        '200':
+          description: Group created successfully
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  id: "new_group_id"
+                  name: "New Example Group"
+                  status: "Active"
+                  isFavourite: false
+                  createdBy: "user123"
+                  creationDate: 1707893324459
+                  lastModifiedBy: "user123"
+                  modificationDate: 1707893326371
+                  objectType: "group"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GroupMetaData'
+        '400':
+          $ref: '#/components/responses/InvalidGroupPayload'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    InvalidGroupPayload:
+      description: Group payload is not valid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    InternalServerError:
+      description: An error occurred on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    GROUP_PAYLOAD:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [Active, Inactive]
+          default: 'Active'
+        isFavourite:
+          type: boolean
+          default: false
+
+    GroupMetaData:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - createdBy
+        - creationDate
+        - lastModifiedBy
+        - modificationDate
+        - objectType
+        - isFavourite
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the group
+        name:
+          type: string
+          description: Name of the group
+        status:
+          type: string
+          enum: [Active, Inactive]
+          description: Status of the group
+        isFavourite:
+          type: boolean
+          description: Indicates whether the group is marked as a favourite
+        createdBy:
+          type: string
+          description: Identifier of the user who created the group
+        creationDate:
+          type: integer
+          format: int64
+          description: Timestamp of when the group was created
+        lastModifiedBy:
+          type: string
+          description: Identifier of the last user who modified the group
+        modificationDate:
+          type: integer
+          format: int64
+          description: Timestamp of the last modification to the group
+        objectType:
+          type: string
+          enum: [group]
+          default: group
+          description: Type of the object, which is 'group' in this case
