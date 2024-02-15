@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: Group Management API
+  version: 1.0.0
+servers:
+  - url: https://api2.requestly.io/v1
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /groups/{id}:
+    delete:
+      summary: Delete a specific group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The unique identifier of the group to delete
+      responses:
+        '200':
+          description: Group deleted successfully
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Group successfully deleted."
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the deletion was successful
+                  message:
+                    type: string
+                    description: Descriptive message about the deletion result
+        '400':
+          $ref: '#/components/responses/InvalidGroupId'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GroupNotFoundResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    InvalidGroupId:
+      description: The provided group ID is invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    UnauthorizedResponse:
+      description: Unauthorized action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    GroupNotFoundResponse:
+      description: The specified group does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+    InternalServerError:
+      description: An error occurred on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommonResponse'
+
+  schemas:
+    CommonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+        message:
+          type: string
+          description: Descriptive message about the operation result
