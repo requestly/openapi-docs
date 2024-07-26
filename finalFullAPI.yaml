@@ -65,6 +65,24 @@ paths:
 
 
     get:
+      summary: Retrieve a list of rules
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          required: false
+          description: The index from where the results should start. Usually set to the value received in `nextOffset` from the previous response.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 75
+            default: 30
+          required: false
+          description: Number of results to return. Maximum value is 75.
       responses:
         '200':
           description: Rules retrieved successfully
@@ -107,6 +125,8 @@ paths:
                           value: "https://typodomain.com"
                         from: "typodomain.com"
                         to: "correctdomain.com"
+                nextOffset: 2
+                total: 10
               schema:
                 type: object
                 properties:
@@ -116,8 +136,15 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Rule'
+                  nextOffset:
+                    type: integer
+                    nullable: true
+                    description: The offset for the next page of results. Null if there are no more records.
+                  total:
+                    type: integer
+                    description: Total number of records available
         '400':
-          $ref: '#/components/responses/BadRequestResponse'
+          $ref: '#/components/responses/BadPageFilters'
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
         '404':
@@ -273,6 +300,23 @@ paths:
   /groups:
     get:
       summary: Retrieve a list of groups
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          required: false
+          description: The index from where the results should start. Usually set to the value received in `nextOffset` from the previous response.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 75
+            default: 30
+          required: false
+          description: Number of results to return. Maximum value is 75.
       responses:
         '200':
           description: List of groups retrieved successfully
@@ -301,17 +345,26 @@ paths:
                   objectType: "group"
                   status: "Inactive"
                   isFavourite: true
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Group'
+              nextOffset: 2
+              total: 10
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Group'
+                nextOffset:
+                  type: integer
+                  nullable: true
+                  description: The offset for the next page of results. Null if there are no more records.
+                total:
+                  type: integer
+                  description: Total number of records available
         '400':
-          $ref: '#/components/responses/InvalidGroupPayload'
+          $ref: '#/components/responses/BadPageFilters'
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
         '500':
@@ -521,6 +574,23 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CommonResponse'
+
+    BadPageFilters:
+      description: Bad request due to invalid pagination parameters
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/CommonResponse'
+              - type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - "Offset should be a number"
+                      - "Offset cannot be negative"
+                      - "Page size should be a number"
+                      - "Page size cannot be negative"
 
     InvalidGroupPayload:
       description: Group payload is not valid
